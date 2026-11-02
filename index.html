@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OBS Settings Generator for Twitch, YouTube &amp; Kick | StreamGearLab</title>
+  <meta name="description" content="Free OBS settings generator: enter platform, upload speed, encoder and CPU to get bitrate, resolution, FPS, keyframe, preset and audio settings from official guidance." />
+  <link rel="canonical" href="https://streamgearlab.com/tools/obs-settings-generator/" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <div class="inner">
+      <a class="brand" href="https://streamgearlab.com/"><img src="icon.svg" alt="" width="32" height="32" />StreamGearLab</a>
+      <a class="live-link" href="https://streamgearlab.com/tools/obs-settings-generator/">Use the live tool on streamgearlab.com →</a>
+    </div>
+  </header>
+  <main class="tool-page">
+    <header class="article-header tool-head">
+      <h1>OBS Settings Generator</h1>
+      <p class="lead">Answer six questions and get the OBS output settings to type in for Twitch, YouTube or Kick, with the reason for each one.</p>
+      <p class="meta">Free, runs entirely in your browser, nothing is uploaded · Rules checked November 1, 2026</p>
+    </header>
+    <noscript><p class="notice">This tool needs JavaScript. The explanation below still works without it.</p></noscript>
+    <section class="tool-card" aria-label="OBS Settings Generator tool">
+
+  <form id="obs-form" class="tool-form" novalidate>
+    <fieldset class="field span-2">
+      <legend>Platform</legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="p" value="twitch" checked /><span>Twitch</span></label>
+        <label class="choice"><input type="radio" name="p" value="youtube" /><span>YouTube</span></label>
+        <label class="choice"><input type="radio" name="p" value="kick" /><span>Kick</span></label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label for="up">Measured upload speed (Mbps)</label>
+      <input id="up" name="up" type="number" inputmode="decimal" min="0.5" max="1000" step="0.1" value="10" required />
+      <p class="hint">Use the lowest of a few speed test runs. <a href="https://streamgearlab.com/tools/bitrate-calculator/">How to measure it</a></p>
+    </div>
+    <div class="field">
+      <label for="enc">Best encoder OBS offers you</label>
+      <select id="enc" name="enc">
+        <option value="nvenc">NVIDIA NVENC (GeForce GTX/RTX)</option>
+        <option value="amf">AMD hardware (Radeon / Ryzen graphics)</option>
+        <option value="qsv">Intel Quick Sync (Intel graphics / Arc)</option>
+        <option value="applevt">Apple VT hardware (Mac)</option>
+        <option value="x264">None, CPU only (x264)</option>
+      </select>
+      <p class="hint">Check OBS → Settings → Output → Video Encoder.</p>
+    </div>
+    <div class="field">
+      <label for="cpu">CPU</label>
+      <select id="cpu" name="cpu">
+        <option value="low">Entry / older laptop (4 cores or fewer)</option>
+        <option value="mid" selected>Mid-range (6 cores)</option>
+        <option value="high">High-end (8+ modern cores)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="canvas">Monitor / base canvas resolution</label>
+      <select id="canvas" name="canvas">
+        <option value="1080">1920×1080</option>
+        <option value="1440">2560×1440</option>
+        <option value="2160">3840×2160 (4K)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="target">Target resolution & frame rate</label>
+      <select id="target" name="target">
+        <option value="auto">Best my setup can handle</option>
+        <option value="1440p60">1440p 60 fps (YouTube only)</option>
+        <option value="1080p60">1080p 60 fps</option>
+        <option value="1080p30">1080p 30 fps</option>
+        <option value="720p60">720p 60 fps</option>
+        <option value="720p30">720p 30 fps</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="content">What you stream</label>
+      <select id="content" name="content">
+        <option value="fast">Fast games (shooters, racing, fighting)</option>
+        <option value="games">Other games (strategy, RPG, cozy)</option>
+        <option value="chat">Just Chatting / IRL / podcast</option>
+        <option value="creative">Art, coding, music, crafts</option>
+      </select>
+    </div>
+    <label class="check span-2" id="av1-wrap"><input type="checkbox" id="av1" name="av1" /> <span>OBS also lists an AV1 or HEVC (H.265) hardware encoder for me (YouTube accepts these at lower bitrates)</span></label>
+    <div class="tool-actions span-2">
+      <button class="btn" type="submit">Generate settings</button>
+      <button class="btn ghost small" type="button" id="copy" hidden>Copy as text</button>
+      <span id="copy-status" class="small muted" role="status"></span>
+    </div>
+  </form>
+  <div id="obs-results" class="results" aria-live="polite"></div>
+    </section>
+    <div class="reading-inner prose">
+<h2>How the generator decides</h2>
+<p>Most "best OBS settings" lists hand everybody the same numbers. That breaks for anyone on a slow connection, a laptop, or a platform with different rules. This generator starts from your <strong>measured upload speed</strong> and works out the bitrate you can sustain using each platform's own rule. Twitch says your upload should equal the stream bitrate plus 30%. Kick says it should be at least twice the bitrate. YouTube publishes no figure, so we apply the same 30% margin as Twitch. It also subtracts your audio bitrate, since audio shares the same upload.</p>
+<p>Next it picks the highest resolution and frame rate your bitrate and hardware can carry. The bitrate limits come from the official tables: Twitch's Broadcasting Guidelines, YouTube's live encoder settings page and Kick's help center. A CPU-only (x264) setup on an entry laptop is capped at 720p30, because encoding 1080p60 in software while running a game is the classic cause of "encoding overloaded" warnings. Hardware encoders (NVENC, AMD, Quick Sync, Apple VT) aren't capped, because they run on dedicated chips rather than your CPU cores.</p>
+<h3>Smooth or sharp?</h3>
+<p>Content type decides the tie-breaks. For fast games the tool keeps 60 fps and drops resolution first, since motion at low bitrate is what turns into blocky mush. For talking, art and coding it keeps resolution and drops to 30 fps, which barely matters when not much on screen moves. On Twitch, fast games at 6,000 kbps get a 1600×900 output, matching the example in Twitch's own guidelines.</p>
+<h3>Settings every platform agrees on</h3>
+<ul>
+  <li><strong>CBR rate control.</strong> All three platforms ask for constant bitrate, and Kick doesn't support VBR at all.</li>
+  <li><strong>2-second keyframe interval.</strong> Type 2 in OBS rather than leaving it at 0 (auto).</li>
+  <li><strong>H.264.</strong> It's the safe codec everywhere. YouTube also takes AV1 and HEVC, and the generator uses YouTube's lower bitrate table for those if you tick the box.</li>
+</ul>
+<h3>After you apply the settings</h3>
+<p>Do a test stream or recording of 10–15 minutes with the game you actually play. In OBS, open <em>View → Stats</em> and watch "Frames missed due to rendering lag", "Skipped frames due to encoding lag" and "Dropped frames (network)". Network drops mean you should lower the bitrate, and Kick's own advice is to cut it by 1,000 kbps at a time. Encoding lag means you should pick a faster preset or a lower resolution. For a full walkthrough, read <a href="https://streamgearlab.com/guides/obs-setup-for-beginners/">OBS setup for beginners</a>. If you're on a laptop, <a href="https://streamgearlab.com/guides/obs-settings-for-laptop-streaming/">OBS settings for laptop streaming</a> covers the extra steps.</p>
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq">
+      <details>
+        <summary>What bitrate should I use in OBS for Twitch?</summary>
+        <p>Twitch recommends 6,000 kbps for 1080p at 60 fps, 4,500 kbps for 1080p at 30 fps or 720p at 60 fps, and 3,000 kbps for 720p at 30 fps, with CBR rate control and a 2-second keyframe interval. Only use a row if your upload speed is at least that bitrate plus 30%.</p>
+      </details>
+      <details>
+        <summary>Should I use NVENC or x264?</summary>
+        <p>If OBS lists a hardware encoder (NVIDIA NVENC, AMD, Intel Quick Sync or Apple VT), start with it. It moves encoding off your CPU, which matters most when you game and stream on the same PC. x264 only makes sense on a strong CPU with spare cores, or a Mac streaming to Kick when the hardware encoder does not offer CBR.</p>
+      </details>
+      <details>
+        <summary>Why does the generator pick 720p60 instead of 1080p30?</summary>
+        <p>For fast-moving games, a smooth 60 fps image at a lower resolution usually looks better than a choppy 30 fps image at a bitrate that cannot keep up with the motion. For talking, art and other slow content it does the opposite and keeps the resolution.</p>
+      </details>
+      <details>
+        <summary>What keyframe interval should I use?</summary>
+        <p>Use 2 seconds. Twitch and Kick both ask for 2 seconds, and YouTube recommends 2 seconds and says not to exceed 4. In OBS, type 2 into the Keyframe Interval field rather than leaving it at 0 (auto).</p>
+      </details>
+      <details>
+        <summary>Can I stream 1440p or 4K?</summary>
+        <p>YouTube accepts 1440p and 4K and publishes bitrates for them. Twitch handles 1440p through its Enhanced Broadcasting feature, which sets the bitrate automatically. Kick is limited to 1080p at 60 fps.</p>
+      </details>
+      <details>
+        <summary>Does this tool upload my information anywhere?</summary>
+        <p>No. The calculation runs in your browser and nothing you type is sent to a server.</p>
+      </details>
+      </div>
+    </div>
+    <aside class="sources reading-inner">
+      <h2>Sources</h2>
+      <p class="small muted">The rules in this tool are based on these official pages, checked November 1, 2026. Platforms change their guidance; if a number here disagrees with the official page, the official page wins.</p>
+      <ul>
+      <li><a href="https://help.twitch.tv/s/article/broadcasting-guidelines" rel="noopener" target="_blank">Twitch – Broadcasting Guidelines</a></li>
+      <li><a href="https://help.twitch.tv/s/article/how-do-i-stream-faq" rel="noopener" target="_blank">Twitch – How Do I Stream FAQ (upload speed + 30%)</a></li>
+      <li><a href="https://support.google.com/youtube/answer/2853702" rel="noopener" target="_blank">YouTube Help – Choose live encoder settings, bitrates, and resolutions</a></li>
+      <li><a href="https://help.kick.com/en/articles/7066931-how-to-stream-on-kick-com" rel="noopener" target="_blank">Kick Help – How to stream on KICK.com</a></li>
+      <li><a href="https://help.kick.com/en/articles/15159752-settings-and-stream-quality-on-the-kick-go-live-app" rel="noopener" target="_blank">Kick Help – Settings and stream quality (bitrate ranges)</a></li>
+      <li><a href="https://help.kick.com/en/articles/14994379-why-is-my-stream-lagging-or-buffering-on-kick" rel="noopener" target="_blank">Kick Help – Why is my stream lagging or buffering?</a></li>
+      <li><a href="https://obsproject.com/kb/hardware-encoding" rel="noopener" target="_blank">OBS Knowledge Base – Hardware Encoding</a></li>
+      </ul>
+    </aside>
+  </main>
+  <footer class="page-footer">
+    <p>Made by <a href="https://streamgearlab.com/">StreamGearLab</a>, plain-English guides and free tools for streamers. Live version: <a href="https://streamgearlab.com/tools/obs-settings-generator/">https://streamgearlab.com/tools/obs-settings-generator/</a></p>
+    <p>Open source under the MIT License.</p>
+  </footer>
+  <script src="stream-rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
